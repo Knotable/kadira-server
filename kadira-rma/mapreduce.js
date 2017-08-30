@@ -69,5 +69,34 @@ MapReduce = function (db, sourceColl, outCollection, map, reduce, options) {
   statBulk.execute();
 
   diff = Date.now() - startAt;
+  clearDbs()
   print("   writing completed in: " + diff + " ms");
 };
+
+
+function removeOlderThen(daysAgo, collectionName, key) {
+    var date = new Date((new Date).getTime() - (1000 * 60 * 60 * 24 * daysAgo))
+    var collection = db.getCollection(collectionName)
+    var query = {}
+    query[key] = {$lt: date}
+    print('Removing from:',  collectionName)
+    collection.remove(query)
+}
+
+var days = 7
+
+function clearDbs() {
+  removeOlderThen(days, 'rawErrorMetrics', 'value._expires')
+  removeOlderThen(days, 'rawMethodsMetrics', 'value._expires')
+  removeOlderThen(days, 'rawPubMetrics', 'value._expires')
+  removeOlderThen(days, 'rawSystemMetrics', 'value._expires')
+  removeOlderThen(days, 'errorMetrics', 'value._expires')
+  removeOlderThen(days, 'systemMetrics', 'value._expires')
+  removeOlderThen(days, 'errorTraces', '_expires')
+  removeOlderThen(days, 'pubMetrics', 'value._expires')
+  removeOlderThen(days, 'pubTraces', '_expires')
+  removeOlderThen(days, 'methodsMetrics', 'value._expires')
+  removeOlderThen(days, 'methodTraces', '_expires')
+  removeOlderThen(days, 'prodStats', 'time')
+  removeOlderThen(days, 'rmaLogs', 'startedAt')
+}
